@@ -1,0 +1,3 @@
+I want to create a pingpang delay effect~
+
+I don't have question for now because I have no idea how to make it...
