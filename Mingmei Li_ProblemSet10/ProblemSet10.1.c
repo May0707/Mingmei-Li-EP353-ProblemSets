@@ -50,7 +50,7 @@ int main(void){
 
   //Compute Triangle Wave (interleave channels)
   for(int t = 0; t < kNumFrames; t++){
-    for(int i = 1; i <= numHarmonics; i += 2){ //Up to numHarmonics
+    for(int i = 1; i <= numHarmonics; i += 1){ //Up to numHarmonics
      if (frequency * i > kSampleRate / 2) break;
       double sample = amplitude / i * sin(2.0 * M_PI * ((frequency * i)/kSampleRate) * t);
       for(int c = 0; c < kNumChannels; c++){
