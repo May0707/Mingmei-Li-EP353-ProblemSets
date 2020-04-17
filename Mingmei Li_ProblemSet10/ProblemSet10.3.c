@@ -13,6 +13,12 @@
 #define kInputFileName "Guitar.wav"
 #define kOutputFileName "Bass Booster.wav"
 
+
+static float selectivity = 70.0;
+static float gain2 = 1;
+static float ratio = 0.5;
+static float gain1, cap;
+
 //Hold SNDFILE and SF_INFO together
 typedef struct SoundFile {
   SNDFILE *file;
@@ -23,6 +29,11 @@ typedef struct SoundFile {
 int openInputSndFile(SoundFile*);
 int createOutputSndFile(SoundFile *inFile, SoundFile *outFile);
 void process(float *inBuffer, float *outBuffer, sf_count_t bufferSize);
+float BassBoosta(float sample);
+ float saturate (float x);
+ 
+ 
+ 
 
 int main(void){
   SoundFile inFile, outFile;
@@ -62,27 +73,19 @@ int main(void){
 //TODO: Implement your DSP here
 void process(float *inBuffer, float *outBuffer, sf_count_t bufferSize){
 
-}
-#define saturate(x) __min(__max(-1.0,x),1.0)
+int i;
+for (i = 0; i < bufferSize; i++){
+  outBuffer[i] = BassBoosta (inBuffer[i]);
+  printf("%f/n", outBuffer[i]);
+}}
 
-int main ()
-{
-  printf ("fmin (100.0, 1.0) = %f\n", fmin(100.0,1.0));
-  printf ("fmin (-100.0, 1.0) = %f\n", fmin(-100.0,1.0));
-  printf ("fmin (-100.0, -1.0) = %f\n", fmin(-100.0,-1.0));
-  return 0;
-}
-
-int main ()
-{
-  printf ("fmax (100.0, 1.0) = %f\n", fmax(100.0,1.0));
-  printf ("fmax (-100.0, 1.0) = %f\n", fmax(-100.0,1.0));
-  printf ("fmax (-100.0, -1.0) = %f\n", fmax(-100.0,-1.0));
-  return 0;
-}
+ float saturate (float x){
+  return fmin (fmax (-1.0, x), 1.0);
+ }
 
 float BassBoosta(float sample)
-{
+ {
+
 static float selectivity, gain1, gain2, ratio, cap;
 gain1 = 1.0/(selectivity + 1.0);
 
