@@ -5,13 +5,14 @@
 #include <sndfile.h>
 
 //Compile with:
-//clang ProblemSet10.2.c -o ProblemSet10.2 -lsndfile
+//clang Template.c -o Template -lsndfile
 //Run with:
-//./ProblemSet10.2
+//./Template
 
+#define kInputFileName "CheeseSynth.wav"
+#define kOutputFileName "Delay.wav"
 
-#define kInputFileName "Guitar.wav"
-#define kOutputFileName "Bit Quantization.wav"
+static int keepBits = 1;
 
 //Hold SNDFILE and SF_INFO together
 typedef struct SoundFile {
@@ -22,7 +23,8 @@ typedef struct SoundFile {
 //Function prototypes
 int openInputSndFile(SoundFile*);
 int createOutputSndFile(SoundFile *inFile, SoundFile *outFile);
-void process(float *inBuffer, float *outBuffer, sf_count_t bufferSize);
+void process(short *inBuffer, short *outBuffer, sf_count_t bufferSize);
+short keep_bits_from_16( short input, int keepBits ); 
 
 int main(void){
   SoundFile inFile, outFile;
@@ -36,11 +38,11 @@ int main(void){
   sf_count_t bufferSize = inFile.info.frames;
 
   //Allocate buffers for sound processing
-  float *inBuffer = (float *) malloc(bufferSize*sizeof(float));
-  float *outBuffer = (float *) calloc(bufferSize,sizeof(float));
+  short *inBuffer = (short *) malloc(bufferSize*sizeof(short));
+  short *outBuffer = (short *) calloc(bufferSize,sizeof(short));
 
   //Copy content the file content to the buffer
-  sf_read_float(inFile.file, inBuffer, bufferSize);
+  sf_read_short(inFile.file, inBuffer, bufferSize);
   
   //process inBuffer and copy the result to outBuffer
   process(inBuffer, outBuffer, bufferSize);
@@ -48,7 +50,7 @@ int main(void){
   //Create output file and write the result
   error = createOutputSndFile(&inFile, &outFile);
   if(error) return 1;
-  sf_write_float(outFile.file, outBuffer, bufferSize);
+  sf_write_short(outFile.file, outBuffer, bufferSize);
   
   // //Clean up
   sf_close(inFile.file);
@@ -60,13 +62,11 @@ int main(void){
 }
 
 //TODO: Implement your DSP here
-void process(float *inBuffer, float *outBuffer, sf_count_t bufferSize){
-
-}
-short keep_bits_from_16( short input, int keepBits ) {
-    short prevent_offset = static_cast<unsigned short>(-1) >> keepBits+1;
-    input &= (-1 << (16-keepBits)));
-    return input + prevent_offset
+void process(short *inBuffer, short *outBuffer, sf_count_t bufferSize){
+	int i;
+	for(i = 0; i < bufferSize; i++){
+		outBuffer[i] = keep_bits_from_16(inBuffer[i], keepBits);
+	}	
 }
 
 int openInputSndFile(SoundFile *sndFile){
@@ -112,4 +112,10 @@ int createOutputSndFile(SoundFile *inFile, SoundFile *outFile){
 		return 1;
 	}
   return 0;
+}
+
+short keep_bits_from_16( short input, int keepBits ) {
+    short prevent_offset = (unsigned short)(-1) >> keepBits+1;
+    input &= (-1 << (16-keepBits));
+    return input + prevent_offset; 
 }
